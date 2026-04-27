@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import type { Buffer } from 'node:buffer'
+import { Buffer } from 'node:buffer'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { handleLookupRequest } from './lib/lookup.js'
