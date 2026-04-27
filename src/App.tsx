@@ -22,10 +22,26 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [markdown, setMarkdown] = useState('')
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [stepIndex, setStepIndex] = useState(0)
   const resultRef = useRef<HTMLElement | null>(null)
 
   const renderedMarkdown = useMemo(() => marked.parse(markdown), [markdown])
+
+  async function handleCopyMarkdown() {
+    if (!markdown) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(markdown)
+      setCopyState('copied')
+      window.setTimeout(() => setCopyState('idle'), 1800)
+    } catch {
+      setCopyState('failed')
+      window.setTimeout(() => setCopyState('idle'), 1800)
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,6 +55,7 @@ function App() {
     setLoading(true)
     setError('')
     setMarkdown('')
+    setCopyState('idle')
     setStepIndex(0)
 
     const stepTimer = window.setInterval(() => {
@@ -151,7 +168,21 @@ function App() {
         <section className="panel output-panel" ref={resultRef}>
           <div className="panel-heading">
             <p>Research output</p>
-            <span className="mono-label">markdown</span>
+            {markdown ? (
+              <button
+                type="button"
+                className="copy-button"
+                onClick={handleCopyMarkdown}
+              >
+                {copyState === 'copied'
+                  ? 'Copied'
+                  : copyState === 'failed'
+                    ? 'Copy failed'
+                    : 'Copy markdown'}
+              </button>
+            ) : (
+              <span className="mono-label">markdown</span>
+            )}
           </div>
 
           {markdown ? (
